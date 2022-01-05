@@ -96,18 +96,10 @@ using std::fdopen;
 // There is no thread annotation support.
 #define EXCLUSIVE_LOCKS_REQUIRED(mu)
 
-static bool BoolFromEnv(const char *varname, bool defval) {
-  const char* const valstr = getenv(varname);
-  if (!valstr) {
-    return defval;
-  }
-  return memchr("tTyY1\0", valstr[0], 6) != NULL;
-}
-
-GLOG_DEFINE_bool(logtostderr, BoolFromEnv("GOOGLE_LOGTOSTDERR", false),
-                 "log messages go to stderr instead of logfiles");
-GLOG_DEFINE_bool(alsologtostderr, BoolFromEnv("GOOGLE_ALSOLOGTOSTDERR", false),
-                 "log messages go to stderr in addition to logfiles");
+GLOG_DEFINE_bool(alsologtostderr, true,
+                 "log messages go to stderr (in addition to possibly logfiles)");
+GLOG_DEFINE_bool(alsologtologfiles, false,
+                 "log messages go to logfiles (in addition to possibly stderr)");
 GLOG_DEFINE_bool(colorlogtostderr, false,
                  "color messages logged to stderr (if supported by terminal)");
 #ifdef OS_LINUX
@@ -787,11 +779,10 @@ inline void LogDestination::LogToAllLogfiles(LogSeverity severity,
                                              const char* message,
                                              size_t len) {
 
-  if ( FLAGS_logtostderr ) {           // global flag: never log to file
-    ColoredWriteToStderr(severity, message, len);
-  } else {
-    for (int i = severity; i >= 0; --i)
-      LogDestination::MaybeLogToLogfile(i, timestamp, message, len);
+  if (FLAGS_alsologtologfiles) {
+    for (int i = severity; i >= 0; --i) {
+    LogDestination::MaybeLogToLogfile(i, timestamp, message, len);
+    }
   }
 }
 
@@ -1400,7 +1391,7 @@ static char fatal_message[256];
 void ReprintFatalMessage() {
   if (fatal_message[0]) {
     const int n = strlen(fatal_message);
-    if (!FLAGS_logtostderr) {
+    if (!FLAGS_alsologtostderr) {
       // Also write to stderr (don't color to avoid terminal checks)
       WriteToStderr(fatal_message, n);
     }
@@ -1426,22 +1417,7 @@ void LogMessage::SendToLog() EXCLUSIVE_LOCKS_REQUIRED(log_mutex) {
     already_warned_before_initgoogle = true;
   }
 
-  // global flag: never log to file if set.  Also -- don't log to a
-  // file if we haven't parsed the command line flags to get the
-  // program name.
-  if (FLAGS_logtostderr || !IsGoogleLoggingInitialized()) {
-    ColoredWriteToStderr(data_->severity_,
-                         data_->message_text_, data_->num_chars_to_log_);
-
-    // this could be protected by a flag if necessary.
-    LogDestination::LogToSinks(data_->severity_,
-                               data_->fullname_, data_->basename_,
-                               data_->line_, &data_->tm_time_,
-                               data_->message_text_ + data_->num_prefix_chars_,
-                               (data_->num_chars_to_log_ -
-                                data_->num_prefix_chars_ - 1));
-  } else {
-
+  if (true) {
     // log this message to all log files of severity <= severity_
     LogDestination::LogToAllLogfiles(data_->severity_, data_->timestamp_,
                                      data_->message_text_,
@@ -1478,7 +1454,7 @@ void LogMessage::SendToLog() EXCLUSIVE_LOCKS_REQUIRED(log_mutex) {
       fatal_time = data_->timestamp_;
     }
 
-    if (!FLAGS_logtostderr) {
+    if (FLAGS_alsologtologfiles) {
       for (int i = 0; i < NUM_SEVERITIES; ++i) {
         if ( LogDestination::log_destinations_[i] )
           LogDestination::log_destinations_[i]->logger_->Write(true, 0, "", 0);

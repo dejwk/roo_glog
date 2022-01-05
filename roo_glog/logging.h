@@ -289,11 +289,11 @@
   using rfLS::FLAGS_##name
 #endif
 
-// Set whether log messages go to stderr instead of logfiles
-DECLARE_bool(logtostderr);
-
-// Set whether log messages go to stderr in addition to logfiles.
+// Set whether log messages go to stderr.
 DECLARE_bool(alsologtostderr);
+
+// Set whether log messages go log files.
+DECLARE_bool(alsologtologfiles);
 
 // Set color messages logged to stderr (if supported by terminal).
 DECLARE_bool(colorlogtostderr);

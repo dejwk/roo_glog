@@ -115,7 +115,7 @@ static char crash_buf[kLogBufSize + 1] = { 0 };  // Will end in '\0'
 
 void RawLog__(LogSeverity severity, const char* file, int line,
               const char* format, ...) {
-  if (!(FLAGS_logtostderr || severity >= FLAGS_stderrthreshold ||
+  if (!(severity >= FLAGS_stderrthreshold ||
         FLAGS_alsologtostderr || !IsGoogleLoggingInitialized())) {
     return;  // this stderr log message is suppressed
   }
