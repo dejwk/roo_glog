@@ -40,8 +40,8 @@
 #include <cstdio>
 #include <string>
 #include "base/commandlineflags.h"
-#include "glog/logging.h"
-#include "glog/raw_logging.h"
+#include "roo_glog/logging.h"
+#include "roo_glog/raw_logging.h"
 
 // glog doesn't have annotation
 #define ANNOTATE_BENIGN_RACE(address, description)

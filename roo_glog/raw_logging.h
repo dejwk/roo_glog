@@ -40,8 +40,8 @@
 
 _START_GOOGLE_NAMESPACE_
 
-#include "glog/log_severity.h"
-#include "glog/vlog_is_on.h"
+#include "roo_glog/log_severity.h"
+#include "roo_glog/vlog_is_on.h"
 
 // Annoying stuff for windows -- makes sure clients can import these functions
 #ifndef GOOGLE_GLOG_DLL_DECL
