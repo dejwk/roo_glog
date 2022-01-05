@@ -53,54 +53,75 @@
 #include <string.h>               // for memchr
 #include <stdlib.h>               // for getenv
 
-#ifdef HAVE_LIB_GFLAGS
-
-#include <gflags/gflags.h>
-
-#else
-
 #include "roo_glog/logging.h"
 
-#define DECLARE_VARIABLE(type, shorttype, name, tn)                     \
-  namespace rfL##shorttype {                                            \
-    extern GOOGLE_GLOG_DLL_DECL type FLAGS_##name;                      \
-  }                                                                     \
-  using rfL##shorttype::FLAGS_##name
-#define DEFINE_VARIABLE(type, shorttype, name, value, meaning, tn)      \
-  namespace rfL##shorttype {                                            \
-    GOOGLE_GLOG_DLL_DECL type FLAGS_##name(value);                      \
-    char FLAGS_no##name;                                                \
-  }                                                                     \
-  using rfL##shorttype::FLAGS_##name
+#include <stdio.h>
+
+#define DECLARE_VARIABLE(type, shorttype, name, tn) \
+  namespace rfL##shorttype {                        \
+    type& FLAGS_##name##_get();                     \
+    void FLAGS_##name##_set(const type& val);       \
+  }                                                 \
+  using rfL##shorttype::FLAGS_##name##_get;         \
+  using rfL##shorttype::FLAGS_##name##_set;
+
+#define DEFINE_VARIABLE(type, shorttype, name, value, meaning, tn) \
+  namespace rfL##shorttype {                                       \
+    type FLAGS_##name##_val;                                       \
+    struct FLAGS_##name##_init {                                   \
+      FLAGS_##name##_init() { FLAGS_##name##_val = value; }        \
+    };                                                             \
+    type& FLAGS_##name##_get() {                                   \
+      static FLAGS_##name##_init init;                             \
+      return FLAGS_##name##_val;                                   \
+    };                                                             \
+    void FLAGS_##name##_set(const type& val) {                     \
+      FLAGS_##name##_get();                                        \
+      FLAGS_##name##_val = val;                                    \
+    };                                                             \
+    char FLAGS_no##name;                                           \
+  }                                                                \
+  using rfL##shorttype::FLAGS_##name##_get;                        \
+  using rfL##shorttype::FLAGS_##name##_set;
 
 // bool specialization
-#define DECLARE_bool(name) \
-  DECLARE_VARIABLE(bool, B, name, bool)
+#define DECLARE_bool(name) DECLARE_VARIABLE(bool, B, name, bool)
 #define DEFINE_bool(name, value, meaning) \
   DEFINE_VARIABLE(bool, B, name, value, meaning, bool)
 
 // int32 specialization
-#define DECLARE_int32(name) \
-  DECLARE_VARIABLE(int32_t, I, name, int32)
+#define DECLARE_int32(name) DECLARE_VARIABLE(int32_t, I, name, int32)
 #define DEFINE_int32(name, value, meaning) \
   DEFINE_VARIABLE(int32_t, I, name, value, meaning, int32)
 
 // Special case for string, because we have to specify the namespace
 // std::string, which doesn't play nicely with our FLAG__namespace hackery.
-#define DECLARE_string(name)                                            \
-  namespace rfLS {                                                      \
-    extern GOOGLE_GLOG_DLL_DECL std::string& FLAGS_##name;              \
-  }                                                                     \
-  using fLS::FLAGS_##name
-#define DEFINE_string(name, value, meaning)                             \
-  namespace rfLS {                                                      \
-    std::string FLAGS_##name##_buf(value);                              \
-    GOOGLE_GLOG_DLL_DECL std::string& FLAGS_##name = FLAGS_##name##_buf; \
-    char FLAGS_no##name;                                                \
-  }                                                                     \
-  using rfLS::FLAGS_##name
+#define DECLARE_string(name)                         \
+  namespace rfLS {                                   \
+  ::std::string FLAGS_##name##_get();                \
+  void FLAGS_##name##_set(const ::std::string& val); \
+  }                                                  \
+  using rfLS::FLAGS_##name##_get;                    \
+  using rfLS::FLAGS_##name##_set;
 
-#endif  // HAVE_LIB_GFLAGS
+#define DEFINE_string(name, value, meaning)                                  \
+  namespace rfLS {                                                           \
+  ::std::string* FLAGS_##name##_val;                                         \
+  struct FLAGS_##name##_init {                                               \
+    FLAGS_##name##_init() { FLAGS_##name##_val = new ::std::string(value); } \
+  };                                                                         \
+  ::std::string& FLAGS_##name##_get() {                                      \
+    static FLAGS_##name##_init init;                                         \
+    return *FLAGS_##name##_val;                                              \
+  };                                                                         \
+  void FLAGS_##name##_set(const ::std::string& val) {                        \
+    FLAGS_##name##_get();                                                    \
+    *FLAGS_##name##_val = val;                                               \
+  };                                                                         \
+  char FLAGS_no##name;                                                       \
+  }                                                                          \
+  using rfLS::FLAGS_##name##_get;                                            \
+  using rfLS::FLAGS_##name##_set;
 
 // Define GLOG_DEFINE_* using DEFINE_* . By using these macros, we
 // have GLOG_* environ variables even if we have gflags installed.

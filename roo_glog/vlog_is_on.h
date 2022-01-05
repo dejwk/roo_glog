@@ -85,7 +85,7 @@
      int32_t verbose_level__ = (verboselevel);                    \
      (*vlocal__ >= verbose_level__) &&                          \
      ((vlocal__ != &GOOGLE_NAMESPACE::kLogSiteUninitialized) ||                   \
-      (GOOGLE_NAMESPACE::InitVLOG3__(&vlocal__, &FLAGS_v,                         \
+      (GOOGLE_NAMESPACE::InitVLOG3__(&vlocal__, &GET_ROO_GLOG_FLAG(v),                         \
                    __FILE__, verbose_level__))); })
 #else
 // GNU extensions not available, so we do not support --vmodule.

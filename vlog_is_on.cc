@@ -135,7 +135,7 @@ static void VLOG2Initializer() {
   // Can now parse --vmodule flag and initialize mapping of module-specific
   // logging levels.
   inited_vmodule = false;
-  const char* vmodule = FLAGS_vmodule.c_str();
+  const char* vmodule = GET_ROO_GLOG_FLAG(vmodule).c_str();
   const char* sep;
   VModuleInfo* head = NULL;
   VModuleInfo* tail = NULL;
@@ -164,7 +164,7 @@ static void VLOG2Initializer() {
 
 // This can be called very early, so we use SpinLock and RAW_VLOG here.
 int SetVLOGLevel(const char* module_pattern, int log_level) {
-  int result = FLAGS_v;
+  int result = GET_ROO_GLOG_FLAG(v);
   int const pattern_len = strlen(module_pattern);
   bool found = false;
   {

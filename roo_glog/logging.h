@@ -266,28 +266,34 @@
 
 #ifndef DECLARE_VARIABLE
 #define MUST_UNDEF_GFLAGS_DECLARE_MACROS
-#define DECLARE_VARIABLE(type, shorttype, name, tn)                     \
-  namespace rfL##shorttype {                                            \
-    extern GOOGLE_GLOG_DLL_DECL type FLAGS_##name;                      \
-  }                                                                     \
-  using rfL##shorttype::FLAGS_##name
+#define DECLARE_VARIABLE(type, shorttype, name, tn) \
+  namespace rfL##shorttype {                        \
+    type& FLAGS_##name##_get();                     \
+    void FLAGS_##name##_set(const type& val);       \
+  }                                                 \
+  using rfL##shorttype::FLAGS_##name##_get;         \
+  using rfL##shorttype::FLAGS_##name##_set
 
 // bool specialization
-#define DECLARE_bool(name) \
-  DECLARE_VARIABLE(bool, B, name, bool)
+#define DECLARE_bool(name) DECLARE_VARIABLE(bool, B, name, bool)
 
 // int32 specialization
-#define DECLARE_int32(name) \
-  DECLARE_VARIABLE(int32_t, I, name, int32)
+#define DECLARE_int32(name) DECLARE_VARIABLE(int32_t, I, name, int32)
 
 // Special case for string, because we have to specify the namespace
 // std::string, which doesn't play nicely with our FLAG__namespace hackery.
-#define DECLARE_string(name)                                            \
-  namespace rfLS {                                                      \
-    extern GOOGLE_GLOG_DLL_DECL std::string& FLAGS_##name;              \
-  }                                                                     \
-  using rfLS::FLAGS_##name
+#define DECLARE_string(name)                         \
+  namespace rfLS {                                   \
+  std::string& FLAGS_##name##_get();                 \
+  void FLAGS_##name##_set(const ::std::string& val); \
+  }                                                  \
+  using rfLS::FLAGS_##name##_get;                    \
+  using rfLS::FLAGS_##name##_set;
+
 #endif
+
+#define GET_ROO_GLOG_FLAG(name) FLAGS_##name##_get()
+#define SET_ROO_GLOG_FLAG(name, val) FLAGS_##name##_set(val)
 
 // Set whether log messages go to stderr.
 DECLARE_bool(alsologtostderr);

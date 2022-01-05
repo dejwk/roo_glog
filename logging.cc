@@ -328,7 +328,7 @@ static const char* GetAnsiColorCode(GLogColor color) {
 
 // Safely get max_log_size, overriding to 1 if it somehow gets defined as 0
 static int32_t MaxLogSize() {
-  return (FLAGS_max_log_size > 0 ? FLAGS_max_log_size : 1);
+  return (GET_ROO_GLOG_FLAG(max_log_size) > 0 ? GET_ROO_GLOG_FLAG(max_log_size) : 1);
 }
 
 #ifndef MAX_LOG_MESSAGE_LEN
@@ -662,7 +662,7 @@ inline void LogDestination::SetStderrLogging(LogSeverity min_severity) {
   // Prevent any subtle race conditions by wrapping a mutex lock around
   // all this stuff.
   MutexLock l(&log_mutex);
-  FLAGS_stderrthreshold = min_severity;
+  SET_ROO_GLOG_FLAG(stderrthreshold, min_severity);
 }
 
 inline void LogDestination::LogToStderr() {
@@ -687,7 +687,7 @@ inline void LogDestination::SetEmailLogging(LogSeverity min_severity,
 static void ColoredWriteToStderr(LogSeverity severity,
                                  const char* message, size_t len) {
   const GLogColor color =
-      (LogDestination::terminal_supports_color() && FLAGS_colorlogtostderr) ?
+      (LogDestination::terminal_supports_color() && GET_ROO_GLOG_FLAG(colorlogtostderr)) ?
       SeverityToColor(severity) : COLOR_DEFAULT;
 
   // Avoid using cerr from this module since we may get called during
@@ -729,7 +729,7 @@ static void WriteToStderr(const char* message, size_t len) {
 
 inline void LogDestination::MaybeLogToStderr(LogSeverity severity,
 					     const char* message, size_t len) {
-  if ((severity >= FLAGS_stderrthreshold) || FLAGS_alsologtostderr) {
+  if ((severity >= GET_ROO_GLOG_FLAG(stderrthreshold)) || GET_ROO_GLOG_FLAG(alsologtostderr)) {
     ColoredWriteToStderr(severity, message, len);
 #ifdef OS_WINDOWS
     // On Windows, also output to the debugger
@@ -742,8 +742,8 @@ inline void LogDestination::MaybeLogToStderr(LogSeverity severity,
 inline void LogDestination::MaybeLogToEmail(LogSeverity severity,
 					    const char* message, size_t len) {
   if (severity >= email_logging_severity_ ||
-      severity >= FLAGS_logemaillevel) {
-    string to(FLAGS_alsologtoemail);
+      severity >= GET_ROO_GLOG_FLAG(logemaillevel)) {
+    string to(GET_ROO_GLOG_FLAG(alsologtoemail));
     if (!addresses_.empty()) {
       if (!to.empty()) {
         to += ",";
@@ -769,7 +769,7 @@ inline void LogDestination::MaybeLogToLogfile(LogSeverity severity,
                                               time_t timestamp,
 					      const char* message,
 					      size_t len) {
-  const bool should_flush = severity > FLAGS_logbuflevel;
+  const bool should_flush = severity > GET_ROO_GLOG_FLAG(logbuflevel);
   LogDestination* destination = log_destination(severity);
   destination->logger_->Write(should_flush, timestamp, message, len);
 }
@@ -779,7 +779,7 @@ inline void LogDestination::LogToAllLogfiles(LogSeverity severity,
                                              const char* message,
                                              size_t len) {
 
-  if (FLAGS_alsologtologfiles) {
+  if (GET_ROO_GLOG_FLAG(alsologtologfiles)) {
     for (int i = severity; i >= 0; --i) {
     LogDestination::MaybeLogToLogfile(i, timestamp, message, len);
     }
@@ -907,7 +907,7 @@ void LogFileObject::FlushUnlocked(){
     bytes_since_flush_ = 0;
   }
   // Figure out when we are due for another flush.
-  const int64_t next = (FLAGS_logbufsecs
+  const int64_t next = (GET_ROO_GLOG_FLAG(logbufsecs)
                       * static_cast<int64_t>(1000000));  // in usec
   next_flush_time_ = CycleClock_Now() + UsecToCycles(next);
 }
@@ -916,7 +916,7 @@ bool LogFileObject::CreateLogfile(const string& time_pid_string) {
   string string_filename = base_filename_+filename_extension_+
                            time_pid_string;
   const char* filename = string_filename.c_str();
-  int fd = open(filename, O_WRONLY | O_CREAT | O_EXCL, FLAGS_logfile_mode);
+  int fd = open(filename, O_WRONLY | O_CREAT | O_EXCL, GET_ROO_GLOG_FLAG(logfile_mode));
   if (fd == -1) return false;
 #ifdef HAVE_FCNTL
   // Mark the file close-on-exec. We don't really care if this fails
@@ -1103,7 +1103,7 @@ void LogFileObject::Write(bool force_flush,
     // greater than 4096, thereby indicating an error.
     errno = 0;
     fwrite(message, 1, message_len, file_);
-    if ( FLAGS_stop_logging_if_full_disk &&
+    if ( GET_ROO_GLOG_FLAG(stop_logging_if_full_disk) &&
          errno == ENOSPC ) {  // disk full, stop writing to disk
       stop_writing = true;  // until the disk is
       return;
@@ -1131,7 +1131,7 @@ void LogFileObject::Write(bool force_flush,
     FlushUnlocked();
 #ifdef OS_LINUX
     // Only consider files >= 3MiB
-    if (FLAGS_drop_log_memory && file_length_ >= (3 << 20)) {
+    if (GET_ROO_GLOG_FLAG(drop_log_memory) && file_length_ >= (3 << 20)) {
       // Don't evict the most recent 1-2MiB so as not to impact a tailer
       // of the log file and to avoid page rounding issue on linux < 4.7
       uint32_t total_drop_length = (file_length_ & ~((1 << 20) - 1)) - (1 << 20);
@@ -1283,7 +1283,7 @@ void LogMessage::Init(const char* file,
   //    I1018 160715 f5d4fbb0 logging.cc:1153]
   //    (log level, GMT month, date, time, thread_id, file basename, line)
   // We exclude the thread_id for the default thread.
-  if (FLAGS_log_prefix && (line != kNoLogPrefix)) {
+  if (GET_ROO_GLOG_FLAG(log_prefix) && (line != kNoLogPrefix)) {
     stream() << LogSeverityNames[severity][0]
              << setw(2) << 1+data_->tm_time_.tm_mon
              << setw(2) << data_->tm_time_.tm_mday
@@ -1300,11 +1300,11 @@ void LogMessage::Init(const char* file,
   }
   data_->num_prefix_chars_ = data_->stream_.pcount();
 
-  if (!FLAGS_log_backtrace_at.empty()) {
+  if (!GET_ROO_GLOG_FLAG(log_backtrace_at).empty()) {
     char fileline[128];
     snprintf(fileline, sizeof(fileline), "%s:%d", data_->basename_, line);
 #ifdef HAVE_STACKTRACE
-    if (!strcmp(FLAGS_log_backtrace_at.c_str(), fileline)) {
+    if (!strcmp(GET_ROO_GLOG_FLAG(log_backtrace_at).c_str(), fileline)) {
       string stacktrace;
       DumpStackTraceToString(&stacktrace);
       stream() << " (stacktrace:\n" << stacktrace << ") ";
@@ -1339,7 +1339,7 @@ ostream& LogMessage::stream() {
 // Flush buffered message, called by the destructor, or any other function
 // that needs to synchronize the log.
 void LogMessage::Flush() {
-  if (data_->has_been_flushed_ || data_->severity_ < FLAGS_minloglevel)
+  if (data_->has_been_flushed_ || data_->severity_ < GET_ROO_GLOG_FLAG(minloglevel))
     return;
 
   data_->num_chars_to_log_ = data_->stream_.pcount();
@@ -1399,7 +1399,7 @@ static char fatal_message[256];
 void ReprintFatalMessage() {
   if (fatal_message[0]) {
     const int n = strlen(fatal_message);
-    if (!FLAGS_alsologtostderr) {
+    if (GET_ROO_GLOG_FLAG(alsologtostderr)) {
       // Also write to stderr (don't color to avoid terminal checks)
       WriteToStderr(fatal_message, n);
     }
@@ -1455,7 +1455,7 @@ void LogMessage::SendToLog() EXCLUSIVE_LOCKS_REQUIRED(log_mutex) {
       fatal_time = data_->timestamp_;
     }
 
-    if (FLAGS_alsologtologfiles) {
+    if (GET_ROO_GLOG_FLAG(alsologtologfiles)) {
       for (int i = 0; i < NUM_SEVERITIES; ++i) {
         if ( LogDestination::log_destinations_[i] )
           LogDestination::log_destinations_[i]->logger_->Write(true, 0, "", 0);
@@ -1879,9 +1879,9 @@ const vector<string>& GetLoggingDirectories() {
   if (logging_directories_list == NULL) {
     logging_directories_list = new vector<string>;
 
-    if ( !FLAGS_log_dir.empty() ) {
+    if ( !GET_ROO_GLOG_FLAG(log_dir).empty() ) {
       // A dir was specified, we should use it
-      logging_directories_list->push_back(FLAGS_log_dir.c_str());
+      logging_directories_list->push_back(GET_ROO_GLOG_FLAG(log_dir).c_str());
     } else {
       GetTempDirectories(logging_directories_list);
 #if defined(OS_WINDOWS)

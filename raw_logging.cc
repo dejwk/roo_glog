@@ -115,8 +115,8 @@ static char crash_buf[kLogBufSize + 1] = { 0 };  // Will end in '\0'
 
 void RawLog__(LogSeverity severity, const char* file, int line,
               const char* format, ...) {
-  if (!(severity >= FLAGS_stderrthreshold ||
-        FLAGS_alsologtostderr)) {
+  if (!(severity >= GET_ROO_GLOG_FLAG(stderrthreshold) ||
+        GET_ROO_GLOG_FLAG(alsologtostderr))) {
     return;  // this stderr log message is suppressed
   }
   // can't call localtime_r here: it can allocate
