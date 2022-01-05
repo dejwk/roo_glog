@@ -1,6 +1,8 @@
 /* src/config.h.  Generated from config.h.in by configure.  */
 /* src/config.h.in.  Generated from configure.ac by autoheader.  */
 
+#define OS_EMBEDDED
+
 /* define if glog doesn't use RTTI */
 /* #undef DISABLE_RTTI */
 #define DISABLE_RTTI 1
