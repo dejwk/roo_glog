@@ -38,7 +38,7 @@
 
 #include <time.h>
 
-namespace google {
+_START_GOOGLE_NAMESPACE_
 
 #include "glog/log_severity.h"
 #include "glog/vlog_is_on.h"
@@ -68,7 +68,7 @@ namespace google {
 //   I0821 211317 file.cc:142] RAW: status is 20
 #define RAW_LOG(severity, ...) \
   do { \
-    switch (google::GLOG_ ## severity) {  \
+    switch (GOOGLE_NAMESPACE::GLOG_ ## severity) {  \
       case 0: \
         RAW_LOG_INFO(__VA_ARGS__); \
         break; \
@@ -100,33 +100,33 @@ namespace google {
 #endif // STRIP_LOG == 0
 
 #if STRIP_LOG == 0
-#define RAW_LOG_INFO(...) google::RawLog__(google::GLOG_INFO, \
+#define RAW_LOG_INFO(...) GOOGLE_NAMESPACE::RawLog__(GOOGLE_NAMESPACE::GLOG_INFO, \
                                    __FILE__, __LINE__, __VA_ARGS__)
 #else
-#define RAW_LOG_INFO(...) google::RawLogStub__(0, __VA_ARGS__)
+#define RAW_LOG_INFO(...) GOOGLE_NAMESPACE::RawLogStub__(0, __VA_ARGS__)
 #endif // STRIP_LOG == 0
 
 #if STRIP_LOG <= 1
-#define RAW_LOG_WARNING(...) google::RawLog__(google::GLOG_WARNING,   \
+#define RAW_LOG_WARNING(...) GOOGLE_NAMESPACE::RawLog__(GOOGLE_NAMESPACE::GLOG_WARNING,   \
                                       __FILE__, __LINE__, __VA_ARGS__)
 #else
-#define RAW_LOG_WARNING(...) google::RawLogStub__(0, __VA_ARGS__)
+#define RAW_LOG_WARNING(...) GOOGLE_NAMESPACE::RawLogStub__(0, __VA_ARGS__)
 #endif // STRIP_LOG <= 1
 
 #if STRIP_LOG <= 2
-#define RAW_LOG_ERROR(...) google::RawLog__(google::GLOG_ERROR,       \
+#define RAW_LOG_ERROR(...) GOOGLE_NAMESPACE::RawLog__(GOOGLE_NAMESPACE::GLOG_ERROR,       \
                                     __FILE__, __LINE__, __VA_ARGS__)
 #else
-#define RAW_LOG_ERROR(...) google::RawLogStub__(0, __VA_ARGS__)
+#define RAW_LOG_ERROR(...) GOOGLE_NAMESPACE::RawLogStub__(0, __VA_ARGS__)
 #endif // STRIP_LOG <= 2
 
 #if STRIP_LOG <= 3
-#define RAW_LOG_FATAL(...) google::RawLog__(google::GLOG_FATAL,       \
+#define RAW_LOG_FATAL(...) GOOGLE_NAMESPACE::RawLog__(GOOGLE_NAMESPACE::GLOG_FATAL,       \
                                     __FILE__, __LINE__, __VA_ARGS__)
 #else
 #define RAW_LOG_FATAL(...) \
   do { \
-    google::RawLogStub__(0, __VA_ARGS__);        \
+    GOOGLE_NAMESPACE::RawLogStub__(0, __VA_ARGS__);        \
     exit(1); \
   } while (0)
 #endif // STRIP_LOG <= 3

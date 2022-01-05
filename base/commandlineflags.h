@@ -62,16 +62,16 @@
 #include "glog/logging.h"
 
 #define DECLARE_VARIABLE(type, shorttype, name, tn)                     \
-  namespace fL##shorttype {                                             \
+  namespace rfL##shorttype {                                            \
     extern GOOGLE_GLOG_DLL_DECL type FLAGS_##name;                      \
   }                                                                     \
-  using fL##shorttype::FLAGS_##name
+  using rfL##shorttype::FLAGS_##name
 #define DEFINE_VARIABLE(type, shorttype, name, value, meaning, tn)      \
-  namespace fL##shorttype {                                             \
+  namespace rfL##shorttype {                                            \
     GOOGLE_GLOG_DLL_DECL type FLAGS_##name(value);                      \
     char FLAGS_no##name;                                                \
   }                                                                     \
-  using fL##shorttype::FLAGS_##name
+  using rfL##shorttype::FLAGS_##name
 
 // bool specialization
 #define DECLARE_bool(name) \
@@ -81,24 +81,24 @@
 
 // int32 specialization
 #define DECLARE_int32(name) \
-  DECLARE_VARIABLE(GOOGLE_NAMESPACE::int32, I, name, int32)
+  DECLARE_VARIABLE(int32_t, I, name, int32)
 #define DEFINE_int32(name, value, meaning) \
-  DEFINE_VARIABLE(GOOGLE_NAMESPACE::int32, I, name, value, meaning, int32)
+  DEFINE_VARIABLE(int32_t, I, name, value, meaning, int32)
 
 // Special case for string, because we have to specify the namespace
 // std::string, which doesn't play nicely with our FLAG__namespace hackery.
 #define DECLARE_string(name)                                            \
-  namespace fLS {                                                       \
+  namespace rfLS {                                                      \
     extern GOOGLE_GLOG_DLL_DECL std::string& FLAGS_##name;              \
   }                                                                     \
   using fLS::FLAGS_##name
 #define DEFINE_string(name, value, meaning)                             \
-  namespace fLS {                                                       \
+  namespace rfLS {                                                      \
     std::string FLAGS_##name##_buf(value);                              \
     GOOGLE_GLOG_DLL_DECL std::string& FLAGS_##name = FLAGS_##name##_buf; \
     char FLAGS_no##name;                                                \
   }                                                                     \
-  using fLS::FLAGS_##name
+  using rfLS::FLAGS_##name
 
 #endif  // HAVE_LIB_GFLAGS
 

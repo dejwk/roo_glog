@@ -34,6 +34,8 @@
 #ifndef UTILITIES_H__
 #define UTILITIES_H__
 
+#include <inttypes.h>
+
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__)
 # define OS_WINDOWS
 #elif defined(__CYGWIN__) || defined(__CYGWIN32__)
@@ -167,19 +169,17 @@ bool IsGoogleLoggingInitialized();
 
 bool is_default_thread();
 
-int64 CycleClock_Now();
+int64_t CycleClock_Now();
 
-int64 UsecToCycles(int64 usec);
+int64_t UsecToCycles(int64_t usec);
 
 typedef double WallTime;
 WallTime WallTime_Now();
 
-int32 GetMainThreadPid();
+int32_t GetMainThreadPid();
 bool PidHasChanged();
 
 pid_t GetTID();
-
-const std::string& MyUserName();
 
 // Get the part of filepath after the last path separator.
 // (Doesn't modify filepath, contrary to basename() in libgen.h.)

@@ -6,7 +6,7 @@
 #define DISABLE_RTTI 1
 
 /* Namespace for Google classes */
-#define GOOGLE_NAMESPACE google
+#define GOOGLE_NAMESPACE roo_glog
 
 /* Define if you have the `dladdr' function */
 /* #undef HAVE_DLADDR */
@@ -178,4 +178,4 @@
 #define _END_GOOGLE_NAMESPACE_ }
 
 /* Puts following code inside the Google namespace */
-#define _START_GOOGLE_NAMESPACE_ namespace google {
+#define _START_GOOGLE_NAMESPACE_ namespace roo_glog {

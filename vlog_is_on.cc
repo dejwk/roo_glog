@@ -42,7 +42,6 @@
 #include "base/commandlineflags.h"
 #include "glog/logging.h"
 #include "glog/raw_logging.h"
-#include "base/googleinit.h"
 
 // glog doesn't have annotation
 #define ANNOTATE_BENIGN_RACE(address, description)

@@ -63,7 +63,6 @@
 #include "base/commandlineflags.h"        // to get the program name
 #include "glog/logging.h"
 #include "glog/raw_logging.h"
-#include "base/googleinit.h"
 
 #ifdef HAVE_STACKTRACE
 # include "stacktrace.h"
@@ -1053,15 +1052,7 @@ void LogFileObject::Write(bool force_flush,
       string hostname;
       GetHostName(&hostname);
 
-      string uidname = MyUserName();
-      // We should not call CHECK() here because this function can be
-      // called after holding on to log_mutex. We don't want to
-      // attempt to hold on to the same mutex, and get into a
-      // deadlock. Simply use a name like invalid-user.
-      if (uidname.empty()) uidname = "invalid-user";
-
-      stripped_filename = stripped_filename+'.'+hostname+'.'
-                          +uidname+".log."
+      stripped_filename = stripped_filename+'.'+hostname+".log."
                           +LogSeverityNames[severity_]+'.';
 #endif
 

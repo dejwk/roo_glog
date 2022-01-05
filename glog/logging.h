@@ -86,7 +86,7 @@
 #include <gflags/gflags.h>
 #endif
 
-namespace google {
+_START_GOOGLE_NAMESPACE_
 
 #if 1      // the C99 format
 typedef int32_t int32;
@@ -173,21 +173,21 @@ typedef unsigned __int64 uint64;
 // You can also do occasional logging (log every n'th occurrence of an
 // event):
 //
-//   LOG_EVERY_N(INFO, 10) << "Got the " << google::COUNTER << "th cookie";
+//   LOG_EVERY_N(INFO, 10) << "Got the " << GOOGLE_NAMESPACE::COUNTER << "th cookie";
 //
 // The above will cause log messages to be output on the 1st, 11th, 21st, ...
-// times it is executed.  Note that the special google::COUNTER value is used
+// times it is executed.  Note that the special GOOGLE_NAMESPACE::COUNTER value is used
 // to identify which repetition is happening.
 //
 // You can also do occasional conditional logging (log every n'th
 // occurrence of an event, when condition is satisfied):
 //
-//   LOG_IF_EVERY_N(INFO, (size > 1024), 10) << "Got the " << google::COUNTER
+//   LOG_IF_EVERY_N(INFO, (size > 1024), 10) << "Got the " << GOOGLE_NAMESPACE::COUNTER
 //                                           << "th big cookie";
 //
 // You can log messages the first N times your code executes a line. E.g.
 //
-//   LOG_FIRST_N(INFO, 20) << "Got the " << google::COUNTER << "th cookie";
+//   LOG_FIRST_N(INFO, 20) << "Got the " << GOOGLE_NAMESPACE::COUNTER << "th cookie";
 //
 // Outputs log messages for the first 20 times it is executed.
 //
@@ -204,7 +204,7 @@ typedef unsigned __int64 uint64;
 //
 //   DLOG_IF(INFO, num_cookies > 10) << "Got lots of cookies";
 //
-//   DLOG_EVERY_N(INFO, 10) << "Got the " << google::COUNTER << "th cookie";
+//   DLOG_EVERY_N(INFO, 10) << "Got the " << GOOGLE_NAMESPACE::COUNTER << "th cookie";
 //
 // All "debug mode" logging is compiled away to nothing for non-debug mode
 // compiles.
@@ -248,11 +248,11 @@ typedef unsigned __int64 uint64;
 //         "program with --v=1 or more";
 //   VLOG_EVERY_N(1, 10)
 //      << "I'm printed every 10th occurrence, and when you run the program "
-//         "with --v=1 or more. Present occurence is " << google::COUNTER;
+//         "with --v=1 or more. Present occurence is " << GOOGLE_NAMESPACE::COUNTER;
 //   VLOG_IF_EVERY_N(1, (size > 1024), 10)
 //      << "I'm printed on every 10th occurence of case when size is more "
 //         " than 1024, when you run the program with --v=1 or more. ";
-//         "Present occurence is " << google::COUNTER;
+//         "Present occurence is " << GOOGLE_NAMESPACE::COUNTER;
 //
 // The supported severity levels for macros that allow you to specify one
 // are (in increasing order of severity) INFO, WARNING, ERROR, and FATAL.
@@ -308,10 +308,10 @@ typedef unsigned __int64 uint64;
 #ifndef DECLARE_VARIABLE
 #define MUST_UNDEF_GFLAGS_DECLARE_MACROS
 #define DECLARE_VARIABLE(type, shorttype, name, tn)                     \
-  namespace fL##shorttype {                                             \
+  namespace rfL##shorttype {                                            \
     extern GOOGLE_GLOG_DLL_DECL type FLAGS_##name;                      \
   }                                                                     \
-  using fL##shorttype::FLAGS_##name
+  using rfL##shorttype::FLAGS_##name
 
 // bool specialization
 #define DECLARE_bool(name) \
@@ -319,15 +319,15 @@ typedef unsigned __int64 uint64;
 
 // int32 specialization
 #define DECLARE_int32(name) \
-  DECLARE_VARIABLE(google::int32, I, name, int32)
+  DECLARE_VARIABLE(int32_t, I, name, int32)
 
 // Special case for string, because we have to specify the namespace
 // std::string, which doesn't play nicely with our FLAG__namespace hackery.
 #define DECLARE_string(name)                                            \
-  namespace fLS {                                                       \
+  namespace rfLS {                                                      \
     extern GOOGLE_GLOG_DLL_DECL std::string& FLAGS_##name;              \
   }                                                                     \
-  using fLS::FLAGS_##name
+  using rfLS::FLAGS_##name
 #endif
 
 // Set whether log messages go to stderr instead of logfiles
@@ -392,43 +392,43 @@ DECLARE_bool(stop_logging_if_full_disk);
 // better to have compact code for these operations.
 
 #if GOOGLE_STRIP_LOG == 0
-#define COMPACT_GOOGLE_LOG_INFO google::LogMessage( \
+#define COMPACT_GOOGLE_LOG_INFO GOOGLE_NAMESPACE::LogMessage( \
       __FILE__, __LINE__)
-#define LOG_TO_STRING_INFO(message) google::LogMessage( \
-      __FILE__, __LINE__, google::GLOG_INFO, message)
+#define LOG_TO_STRING_INFO(message) GOOGLE_NAMESPACE::LogMessage( \
+      __FILE__, __LINE__, GOOGLE_NAMESPACE::GLOG_INFO, message)
 #else
-#define COMPACT_GOOGLE_LOG_INFO google::NullStream()
-#define LOG_TO_STRING_INFO(message) google::NullStream()
+#define COMPACT_GOOGLE_LOG_INFO GOOGLE_NAMESPACE::NullStream()
+#define LOG_TO_STRING_INFO(message) GOOGLE_NAMESPACE::NullStream()
 #endif
 
 #if GOOGLE_STRIP_LOG <= 1
-#define COMPACT_GOOGLE_LOG_WARNING google::LogMessage( \
-      __FILE__, __LINE__, google::GLOG_WARNING)
-#define LOG_TO_STRING_WARNING(message) google::LogMessage( \
-      __FILE__, __LINE__, google::GLOG_WARNING, message)
+#define COMPACT_GOOGLE_LOG_WARNING GOOGLE_NAMESPACE::LogMessage( \
+      __FILE__, __LINE__, GOOGLE_NAMESPACE::GLOG_WARNING)
+#define LOG_TO_STRING_WARNING(message) GOOGLE_NAMESPACE::LogMessage( \
+      __FILE__, __LINE__, GOOGLE_NAMESPACE::GLOG_WARNING, message)
 #else
-#define COMPACT_GOOGLE_LOG_WARNING google::NullStream()
-#define LOG_TO_STRING_WARNING(message) google::NullStream()
+#define COMPACT_GOOGLE_LOG_WARNING GOOGLE_NAMESPACE::NullStream()
+#define LOG_TO_STRING_WARNING(message) GOOGLE_NAMESPACE::NullStream()
 #endif
 
 #if GOOGLE_STRIP_LOG <= 2
-#define COMPACT_GOOGLE_LOG_ERROR google::LogMessage( \
-      __FILE__, __LINE__, google::GLOG_ERROR)
-#define LOG_TO_STRING_ERROR(message) google::LogMessage( \
-      __FILE__, __LINE__, google::GLOG_ERROR, message)
+#define COMPACT_GOOGLE_LOG_ERROR GOOGLE_NAMESPACE::LogMessage( \
+      __FILE__, __LINE__, GOOGLE_NAMESPACE::GLOG_ERROR)
+#define LOG_TO_STRING_ERROR(message) GOOGLE_NAMESPACE::LogMessage( \
+      __FILE__, __LINE__, GOOGLE_NAMESPACE::GLOG_ERROR, message)
 #else
-#define COMPACT_GOOGLE_LOG_ERROR google::NullStream()
-#define LOG_TO_STRING_ERROR(message) google::NullStream()
+#define COMPACT_GOOGLE_LOG_ERROR GOOGLE_NAMESPACE::NullStream()
+#define LOG_TO_STRING_ERROR(message) GOOGLE_NAMESPACE::NullStream()
 #endif
 
 #if GOOGLE_STRIP_LOG <= 3
-#define COMPACT_GOOGLE_LOG_FATAL google::LogMessageFatal( \
+#define COMPACT_GOOGLE_LOG_FATAL GOOGLE_NAMESPACE::LogMessageFatal( \
       __FILE__, __LINE__)
-#define LOG_TO_STRING_FATAL(message) google::LogMessage( \
-      __FILE__, __LINE__, google::GLOG_FATAL, message)
+#define LOG_TO_STRING_FATAL(message) GOOGLE_NAMESPACE::LogMessage( \
+      __FILE__, __LINE__, GOOGLE_NAMESPACE::GLOG_FATAL, message)
 #else
-#define COMPACT_GOOGLE_LOG_FATAL google::NullStreamFatal()
-#define LOG_TO_STRING_FATAL(message) google::NullStreamFatal()
+#define COMPACT_GOOGLE_LOG_FATAL GOOGLE_NAMESPACE::NullStreamFatal()
+#define LOG_TO_STRING_FATAL(message) GOOGLE_NAMESPACE::NullStreamFatal()
 #endif
 
 #if defined(NDEBUG) && !defined(DCHECK_ALWAYS_ON)
@@ -442,40 +442,40 @@ DECLARE_bool(stop_logging_if_full_disk);
 #if !DCHECK_IS_ON()
 #define COMPACT_GOOGLE_LOG_DFATAL COMPACT_GOOGLE_LOG_ERROR
 #elif GOOGLE_STRIP_LOG <= 3
-#define COMPACT_GOOGLE_LOG_DFATAL google::LogMessage( \
-      __FILE__, __LINE__, google::GLOG_FATAL)
+#define COMPACT_GOOGLE_LOG_DFATAL GOOGLE_NAMESPACE::LogMessage( \
+      __FILE__, __LINE__, GOOGLE_NAMESPACE::GLOG_FATAL)
 #else
-#define COMPACT_GOOGLE_LOG_DFATAL google::NullStreamFatal()
+#define COMPACT_GOOGLE_LOG_DFATAL GOOGLE_NAMESPACE::NullStreamFatal()
 #endif
 
-#define GOOGLE_LOG_INFO(counter) google::LogMessage(__FILE__, __LINE__, google::GLOG_INFO, counter, &google::LogMessage::SendToLog)
+#define GOOGLE_LOG_INFO(counter) GOOGLE_NAMESPACE::LogMessage(__FILE__, __LINE__, GOOGLE_NAMESPACE::GLOG_INFO, counter, &GOOGLE_NAMESPACE::LogMessage::SendToLog)
 #define SYSLOG_INFO(counter) \
-  google::LogMessage(__FILE__, __LINE__, google::GLOG_INFO, counter, \
-  &google::LogMessage::SendToSyslogAndLog)
+  GOOGLE_NAMESPACE::LogMessage(__FILE__, __LINE__, GOOGLE_NAMESPACE::GLOG_INFO, counter, \
+  &GOOGLE_NAMESPACE::LogMessage::SendToSyslogAndLog)
 #define GOOGLE_LOG_WARNING(counter)  \
-  google::LogMessage(__FILE__, __LINE__, google::GLOG_WARNING, counter, \
-  &google::LogMessage::SendToLog)
+  GOOGLE_NAMESPACE::LogMessage(__FILE__, __LINE__, GOOGLE_NAMESPACE::GLOG_WARNING, counter, \
+  &GOOGLE_NAMESPACE::LogMessage::SendToLog)
 #define SYSLOG_WARNING(counter)  \
-  google::LogMessage(__FILE__, __LINE__, google::GLOG_WARNING, counter, \
-  &google::LogMessage::SendToSyslogAndLog)
+  GOOGLE_NAMESPACE::LogMessage(__FILE__, __LINE__, GOOGLE_NAMESPACE::GLOG_WARNING, counter, \
+  &GOOGLE_NAMESPACE::LogMessage::SendToSyslogAndLog)
 #define GOOGLE_LOG_ERROR(counter)  \
-  google::LogMessage(__FILE__, __LINE__, google::GLOG_ERROR, counter, \
-  &google::LogMessage::SendToLog)
+  GOOGLE_NAMESPACE::LogMessage(__FILE__, __LINE__, GOOGLE_NAMESPACE::GLOG_ERROR, counter, \
+  &GOOGLE_NAMESPACE::LogMessage::SendToLog)
 #define SYSLOG_ERROR(counter)  \
-  google::LogMessage(__FILE__, __LINE__, google::GLOG_ERROR, counter, \
-  &google::LogMessage::SendToSyslogAndLog)
+  GOOGLE_NAMESPACE::LogMessage(__FILE__, __LINE__, GOOGLE_NAMESPACE::GLOG_ERROR, counter, \
+  &GOOGLE_NAMESPACE::LogMessage::SendToSyslogAndLog)
 #define GOOGLE_LOG_FATAL(counter) \
-  google::LogMessage(__FILE__, __LINE__, google::GLOG_FATAL, counter, \
-  &google::LogMessage::SendToLog)
+  GOOGLE_NAMESPACE::LogMessage(__FILE__, __LINE__, GOOGLE_NAMESPACE::GLOG_FATAL, counter, \
+  &GOOGLE_NAMESPACE::LogMessage::SendToLog)
 #define SYSLOG_FATAL(counter) \
-  google::LogMessage(__FILE__, __LINE__, google::GLOG_FATAL, counter, \
-  &google::LogMessage::SendToSyslogAndLog)
+  GOOGLE_NAMESPACE::LogMessage(__FILE__, __LINE__, GOOGLE_NAMESPACE::GLOG_FATAL, counter, \
+  &GOOGLE_NAMESPACE::LogMessage::SendToSyslogAndLog)
 #define GOOGLE_LOG_DFATAL(counter) \
-  google::LogMessage(__FILE__, __LINE__, google::DFATAL_LEVEL, counter, \
-  &google::LogMessage::SendToLog)
+  GOOGLE_NAMESPACE::LogMessage(__FILE__, __LINE__, GOOGLE_NAMESPACE::DFATAL_LEVEL, counter, \
+  &GOOGLE_NAMESPACE::LogMessage::SendToLog)
 #define SYSLOG_DFATAL(counter) \
-  google::LogMessage(__FILE__, __LINE__, google::DFATAL_LEVEL, counter, \
-  &google::LogMessage::SendToSyslogAndLog)
+  GOOGLE_NAMESPACE::LogMessage(__FILE__, __LINE__, GOOGLE_NAMESPACE::DFATAL_LEVEL, counter, \
+  &GOOGLE_NAMESPACE::LogMessage::SendToSyslogAndLog)
 
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__CYGWIN__) || defined(__CYGWIN32__)
 // A very useful logging macro to log windows errors:
@@ -487,8 +487,8 @@ DECLARE_bool(stop_logging_if_full_disk);
                          FORMAT_MESSAGE_FROM_SYSTEM, \
                          0, result, 0, msg, 100, NULL); \
     if (message_length > 0) { \
-      google::LogMessage(__FILE__, __LINE__, google::GLOG_ERROR, 0, \
-          &google::LogMessage::SendToLog).stream() \
+      GOOGLE_NAMESPACE::LogMessage(__FILE__, __LINE__, GOOGLE_NAMESPACE::GLOG_ERROR, 0, \
+          &GOOGLE_NAMESPACE::LogMessage::SendToLog).stream() \
           << reinterpret_cast<const char*>(message); \
       LocalFree(message); \
     } \
@@ -506,7 +506,7 @@ DECLARE_bool(stop_logging_if_full_disk);
 #define LOG(severity) COMPACT_GOOGLE_LOG_ ## severity.stream()
 #define SYSLOG(severity) SYSLOG_ ## severity(0).stream()
 
-namespace google {
+_START_GOOGLE_NAMESPACE_
 
 // They need the definitions of integer types.
 #include "glog/log_severity.h"
@@ -533,15 +533,15 @@ class LogSink;  // defined below
 //   LogSeverity severity;
 // The cast is to disambiguate NULL arguments.
 #define LOG_TO_SINK(sink, severity) \
-  google::LogMessage(                                    \
+  GOOGLE_NAMESPACE::LogMessage(                                    \
       __FILE__, __LINE__,                                               \
-      google::GLOG_ ## severity,                         \
-      static_cast<google::LogSink*>(sink), true).stream()
+      GOOGLE_NAMESPACE::GLOG_ ## severity,                         \
+      static_cast<GOOGLE_NAMESPACE::LogSink*>(sink), true).stream()
 #define LOG_TO_SINK_BUT_NOT_TO_LOGFILE(sink, severity)                  \
-  google::LogMessage(                                    \
+  GOOGLE_NAMESPACE::LogMessage(                                    \
       __FILE__, __LINE__,                                               \
-      google::GLOG_ ## severity,                         \
-      static_cast<google::LogSink*>(sink), false).stream()
+      GOOGLE_NAMESPACE::GLOG_ ## severity,                         \
+      static_cast<GOOGLE_NAMESPACE::LogSink*>(sink), false).stream()
 
 // If a non-NULL string pointer is given, we write this message to that string.
 // We then do normal LOG(severity) logging as well.
@@ -568,9 +568,9 @@ class LogSink;  // defined below
   LOG_TO_STRING_##severity(static_cast<std::vector<std::string>*>(outvec)).stream()
 
 #define LOG_IF(severity, condition) \
-  !(condition) ? (void) 0 : google::LogMessageVoidify() & LOG(severity)
+  !(condition) ? (void) 0 : GOOGLE_NAMESPACE::LogMessageVoidify() & LOG(severity)
 #define SYSLOG_IF(severity, condition) \
-  !(condition) ? (void) 0 : google::LogMessageVoidify() & SYSLOG(severity)
+  !(condition) ? (void) 0 : GOOGLE_NAMESPACE::LogMessageVoidify() & SYSLOG(severity)
 
 #define LOG_ASSERT(condition)  \
   LOG_IF(FATAL, !(condition)) << "Assert failed: " #condition
@@ -625,11 +625,11 @@ struct DummyClassToDefineOperator {};
 // This declaration will allow use to use CHECK macros for user
 // defined classes which have operator<< (e.g., stl_logging.h).
 inline std::ostream& operator<<(
-    std::ostream& out, const google::DummyClassToDefineOperator&) {
+    std::ostream& out, const GOOGLE_NAMESPACE::DummyClassToDefineOperator&) {
   return out;
 }
 
-namespace google {
+_START_GOOGLE_NAMESPACE_
 
 // This formats a value for a failing CHECK_XX statement.  Ordinarily,
 // it uses the definition for operator<<, with a few special cases below.
@@ -740,31 +740,31 @@ DEFINE_CHECK_OP_IMPL(Check_GT, > )
 // in the macro.
 typedef std::string _Check_string;
 #define CHECK_OP_LOG(name, op, val1, val2, log)                         \
-  while (google::_Check_string* _result =                \
-         google::Check##name##Impl(                      \
-             google::GetReferenceableValue(val1),        \
-             google::GetReferenceableValue(val2),        \
+  while (GOOGLE_NAMESPACE::_Check_string* _result =                \
+         GOOGLE_NAMESPACE::Check##name##Impl(                      \
+             GOOGLE_NAMESPACE::GetReferenceableValue(val1),        \
+             GOOGLE_NAMESPACE::GetReferenceableValue(val2),        \
              #val1 " " #op " " #val2))                                  \
     log(__FILE__, __LINE__,                                             \
-        google::CheckOpString(_result)).stream()
+        GOOGLE_NAMESPACE::CheckOpString(_result)).stream()
 #else
 // In optimized mode, use CheckOpString to hint to compiler that
 // the while condition is unlikely.
 #define CHECK_OP_LOG(name, op, val1, val2, log)                         \
-  while (google::CheckOpString _result =                 \
-         google::Check##name##Impl(                      \
-             google::GetReferenceableValue(val1),        \
-             google::GetReferenceableValue(val2),        \
+  while (GOOGLE_NAMESPACE::CheckOpString _result =                 \
+         GOOGLE_NAMESPACE::Check##name##Impl(                      \
+             GOOGLE_NAMESPACE::GetReferenceableValue(val1),        \
+             GOOGLE_NAMESPACE::GetReferenceableValue(val2),        \
              #val1 " " #op " " #val2))                                  \
     log(__FILE__, __LINE__, _result).stream()
 #endif  // STATIC_ANALYSIS, DCHECK_IS_ON()
 
 #if GOOGLE_STRIP_LOG <= 3
 #define CHECK_OP(name, op, val1, val2) \
-  CHECK_OP_LOG(name, op, val1, val2, google::LogMessageFatal)
+  CHECK_OP_LOG(name, op, val1, val2, GOOGLE_NAMESPACE::LogMessageFatal)
 #else
 #define CHECK_OP(name, op, val1, val2) \
-  CHECK_OP_LOG(name, op, val1, val2, google::NullStreamFatal)
+  CHECK_OP_LOG(name, op, val1, val2, GOOGLE_NAMESPACE::NullStreamFatal)
 #endif // STRIP_LOG <= 3
 
 // Equality/Inequality checks - compare two values, and log a FATAL message
@@ -796,7 +796,7 @@ typedef std::string _Check_string;
 // initializer lists.
 
 #define CHECK_NOTNULL(val) \
-  google::CheckNotNull(__FILE__, __LINE__, "'" #val "' Must be non NULL", (val))
+  GOOGLE_NAMESPACE::CheckNotNull(__FILE__, __LINE__, "'" #val "' Must be non NULL", (val))
 
 // Helper functions for string comparisons.
 // To avoid bloat, the definitions are in logging.cc.
@@ -812,8 +812,8 @@ DECLARE_CHECK_STROP_IMPL(strcasecmp, false)
 // Helper macro for string comparisons.
 // Don't use this macro directly in your code, use CHECK_STREQ et al below.
 #define CHECK_STROP(func, op, expected, s1, s2) \
-  while (google::CheckOpString _result = \
-         google::Check##func##expected##Impl((s1), (s2), \
+  while (GOOGLE_NAMESPACE::CheckOpString _result = \
+         GOOGLE_NAMESPACE::Check##func##expected##Impl((s1), (s2), \
                                      #s1 " " #op " " #s2)) \
     LOG(FATAL) << *_result.str_
 
@@ -854,12 +854,12 @@ DECLARE_CHECK_STROP_IMPL(strcasecmp, false)
 #define PLOG(severity) GOOGLE_PLOG(severity, 0).stream()
 
 #define GOOGLE_PLOG(severity, counter)  \
-  google::ErrnoLogMessage( \
-      __FILE__, __LINE__, google::GLOG_ ## severity, counter, \
-      &google::LogMessage::SendToLog)
+  GOOGLE_NAMESPACE::ErrnoLogMessage( \
+      __FILE__, __LINE__, GOOGLE_NAMESPACE::GLOG_ ## severity, counter, \
+      &GOOGLE_NAMESPACE::LogMessage::SendToLog)
 
 #define PLOG_IF(severity, condition) \
-  !(condition) ? (void) 0 : google::LogMessageVoidify() & PLOG(severity)
+  !(condition) ? (void) 0 : GOOGLE_NAMESPACE::LogMessageVoidify() & PLOG(severity)
 
 // A CHECK() macro that postpends errno if the condition is false. E.g.
 //
@@ -893,8 +893,8 @@ PLOG_IF(FATAL, GOOGLE_PREDICT_BRANCH_NOT_TAKEN((invocation) == -1))    \
   ++LOG_OCCURRENCES; \
   if (++LOG_OCCURRENCES_MOD_N > n) LOG_OCCURRENCES_MOD_N -= n; \
   if (LOG_OCCURRENCES_MOD_N == 1) \
-    google::LogMessage( \
-        __FILE__, __LINE__, google::GLOG_ ## severity, LOG_OCCURRENCES, \
+    GOOGLE_NAMESPACE::LogMessage( \
+        __FILE__, __LINE__, GOOGLE_NAMESPACE::GLOG_ ## severity, LOG_OCCURRENCES, \
         &what_to_do).stream()
 
 #define SOME_KIND_OF_LOG_IF_EVERY_N(severity, condition, n, what_to_do) \
@@ -902,8 +902,8 @@ PLOG_IF(FATAL, GOOGLE_PREDICT_BRANCH_NOT_TAKEN((invocation) == -1))    \
   ++LOG_OCCURRENCES; \
   if (condition && \
       ((LOG_OCCURRENCES_MOD_N=(LOG_OCCURRENCES_MOD_N + 1) % n) == (1 % n))) \
-    google::LogMessage( \
-        __FILE__, __LINE__, google::GLOG_ ## severity, LOG_OCCURRENCES, \
+    GOOGLE_NAMESPACE::LogMessage( \
+        __FILE__, __LINE__, GOOGLE_NAMESPACE::GLOG_ ## severity, LOG_OCCURRENCES, \
                  &what_to_do).stream()
 
 #define SOME_KIND_OF_PLOG_EVERY_N(severity, n, what_to_do) \
@@ -911,8 +911,8 @@ PLOG_IF(FATAL, GOOGLE_PREDICT_BRANCH_NOT_TAKEN((invocation) == -1))    \
   ++LOG_OCCURRENCES; \
   if (++LOG_OCCURRENCES_MOD_N > n) LOG_OCCURRENCES_MOD_N -= n; \
   if (LOG_OCCURRENCES_MOD_N == 1) \
-    google::ErrnoLogMessage( \
-        __FILE__, __LINE__, google::GLOG_ ## severity, LOG_OCCURRENCES, \
+    GOOGLE_NAMESPACE::ErrnoLogMessage( \
+        __FILE__, __LINE__, GOOGLE_NAMESPACE::GLOG_ ## severity, LOG_OCCURRENCES, \
         &what_to_do).stream()
 
 #define SOME_KIND_OF_LOG_FIRST_N(severity, n, what_to_do) \
@@ -920,8 +920,8 @@ PLOG_IF(FATAL, GOOGLE_PREDICT_BRANCH_NOT_TAKEN((invocation) == -1))    \
   if (LOG_OCCURRENCES <= n) \
     ++LOG_OCCURRENCES; \
   if (LOG_OCCURRENCES <= n) \
-    google::LogMessage( \
-        __FILE__, __LINE__, google::GLOG_ ## severity, LOG_OCCURRENCES, \
+    GOOGLE_NAMESPACE::LogMessage( \
+        __FILE__, __LINE__, GOOGLE_NAMESPACE::GLOG_ ## severity, LOG_OCCURRENCES, \
         &what_to_do).stream()
 
 namespace glog_internal_namespace_ {
@@ -936,19 +936,19 @@ GOOGLE_GLOG_DLL_DECL bool IsFailureSignalHandlerInstalled();
 }  // namespace glog_internal_namespace_
 
 #define LOG_EVERY_N(severity, n)                                        \
-  SOME_KIND_OF_LOG_EVERY_N(severity, (n), google::LogMessage::SendToLog)
+  SOME_KIND_OF_LOG_EVERY_N(severity, (n), GOOGLE_NAMESPACE::LogMessage::SendToLog)
 
 #define SYSLOG_EVERY_N(severity, n) \
-  SOME_KIND_OF_LOG_EVERY_N(severity, (n), google::LogMessage::SendToSyslogAndLog)
+  SOME_KIND_OF_LOG_EVERY_N(severity, (n), GOOGLE_NAMESPACE::LogMessage::SendToSyslogAndLog)
 
 #define PLOG_EVERY_N(severity, n) \
-  SOME_KIND_OF_PLOG_EVERY_N(severity, (n), google::LogMessage::SendToLog)
+  SOME_KIND_OF_PLOG_EVERY_N(severity, (n), GOOGLE_NAMESPACE::LogMessage::SendToLog)
 
 #define LOG_FIRST_N(severity, n) \
-  SOME_KIND_OF_LOG_FIRST_N(severity, (n), google::LogMessage::SendToLog)
+  SOME_KIND_OF_LOG_FIRST_N(severity, (n), GOOGLE_NAMESPACE::LogMessage::SendToLog)
 
 #define LOG_IF_EVERY_N(severity, condition, n) \
-  SOME_KIND_OF_LOG_IF_EVERY_N(severity, (condition), (n), google::LogMessage::SendToLog)
+  SOME_KIND_OF_LOG_IF_EVERY_N(severity, (condition), (n), GOOGLE_NAMESPACE::LogMessage::SendToLog)
 
 // We want the special COUNTER value available for LOG_EVERY_X()'ed messages
 enum PRIVATE_Counter {COUNTER};
@@ -1004,20 +1004,20 @@ const LogSeverity GLOG_0 = GLOG_ERROR;
 #else  // !DCHECK_IS_ON()
 
 #define DLOG(severity) \
-  true ? (void) 0 : google::LogMessageVoidify() & LOG(severity)
+  true ? (void) 0 : GOOGLE_NAMESPACE::LogMessageVoidify() & LOG(severity)
 
 #define DVLOG(verboselevel) \
   (true || !VLOG_IS_ON(verboselevel)) ?\
-    (void) 0 : google::LogMessageVoidify() & LOG(INFO)
+    (void) 0 : GOOGLE_NAMESPACE::LogMessageVoidify() & LOG(INFO)
 
 #define DLOG_IF(severity, condition) \
-  (true || !(condition)) ? (void) 0 : google::LogMessageVoidify() & LOG(severity)
+  (true || !(condition)) ? (void) 0 : GOOGLE_NAMESPACE::LogMessageVoidify() & LOG(severity)
 
 #define DLOG_EVERY_N(severity, n) \
-  true ? (void) 0 : google::LogMessageVoidify() & LOG(severity)
+  true ? (void) 0 : GOOGLE_NAMESPACE::LogMessageVoidify() & LOG(severity)
 
 #define DLOG_IF_EVERY_N(severity, condition, n) \
-  (true || !(condition))? (void) 0 : google::LogMessageVoidify() & LOG(severity)
+  (true || !(condition))? (void) 0 : GOOGLE_NAMESPACE::LogMessageVoidify() & LOG(severity)
 
 #define DLOG_ASSERT(condition) \
   true ? (void) 0 : LOG_ASSERT(condition)
@@ -1250,7 +1250,7 @@ public:
   int preserved_errno() const;
 
   // Must be called without the log_mutex held.  (L < log_mutex)
-  static int64 num_messages(int severity);
+  static int64_t num_messages(int severity);
 
   struct LogMessageData;
 
@@ -1271,7 +1271,7 @@ private:
   void RecordCrashReason(glog_internal_namespace_::CrashReason* reason);
 
   // Counts of messages sent at each priority:
-  static int64 num_messages_[NUM_SEVERITIES];  // under log_mutex
+  static int64_t num_messages_[NUM_SEVERITIES];  // under log_mutex
 
   // We keep the data in a separate struct so that each instance of
   // LogMessage uses less stack space.
@@ -1304,7 +1304,7 @@ inline void LogAtLevel(int const severity, std::string const &msg) {
 // version since there are two advantages: 1. this version outputs the
 // file name and the line number where this macro is put like other
 // LOG macros, 2. this macro can be used as C++ stream.
-#define LOG_AT_LEVEL(severity) google::LogMessage(__FILE__, __LINE__, severity).stream()
+#define LOG_AT_LEVEL(severity) GOOGLE_NAMESPACE::LogMessage(__FILE__, __LINE__, severity).stream()
 
 // Check if it's compiled in C++11 mode.
 //
@@ -1511,7 +1511,7 @@ GOOGLE_GLOG_DLL_DECL void ReprintFatalMessage();
 // lose very small amounts of data. For security, only follow symlinks
 // if the path is /proc/self/fd/*
 GOOGLE_GLOG_DLL_DECL void TruncateLogFile(const char *path,
-                                          int64 limit, int64 keep);
+                                          int64_t limit, int64_t keep);
 
 // Truncate stdout and stderr if they are over the value specified by
 // --max_log_size; keep the final 1MB.  This function has the same
@@ -1558,7 +1558,7 @@ class GOOGLE_GLOG_DLL_DECL Logger {
   // Get the current LOG file size.
   // The returned value is approximate since some
   // logged data may not have been flushed to disk yet.
-  virtual uint32 LogSize() = 0;
+  virtual uint32_t LogSize() = 0;
 };
 
 // Get the logger for the specified severity level.  The logger

@@ -54,8 +54,6 @@
 # include <pwd.h>
 #endif
 
-#include "base/googleinit.h"
-
 using std::string;
 
 _START_GOOGLE_NAMESPACE_
@@ -290,41 +288,6 @@ const char* const_basename(const char* filepath) {
 #endif
   return base ? (base+1) : filepath;
 }
-
-static string g_my_user_name;
-const string& MyUserName() {
-  return g_my_user_name;
-}
-static void MyUserNameInitializer() {
-  // TODO(hamaji): Probably this is not portable.
-#if defined(OS_WINDOWS)
-  const char* user = getenv("USERNAME");
-#else
-  const char* user = getenv("USER");
-#endif
-  if (user != NULL) {
-    g_my_user_name = user;
-  } else {
-#if defined(HAVE_PWD_H) && defined(HAVE_UNISTD_H)
-    struct passwd pwd;
-    struct passwd* result = NULL;
-    char buffer[1024] = {'\0'};
-    uid_t uid = geteuid();
-    int pwuid_res = getpwuid_r(uid, &pwd, buffer, sizeof(buffer), &result);
-    if (pwuid_res == 0) {
-      g_my_user_name = pwd.pw_name;
-    } else {
-      snprintf(buffer, sizeof(buffer), "uid%d", uid);
-      g_my_user_name = buffer;
-    }
-#endif
-    if (g_my_user_name.empty()) {
-      g_my_user_name = "invalid-user";
-    }
-  }
-
-}
-REGISTER_MODULE_INITIALIZER(utilities, MyUserNameInitializer());
 
 #ifdef HAVE_STACKTRACE
 void DumpStackTraceToString(string* stacktrace) {
