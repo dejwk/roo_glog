@@ -165,8 +165,6 @@ namespace glog_internal_namespace_ {
 
 const char* ProgramInvocationShortName();
 
-bool IsGoogleLoggingInitialized();
-
 bool is_default_thread();
 
 int64_t CycleClock_Now();
@@ -229,9 +227,7 @@ struct CrashReason {
 };
 
 void SetCrashReason(const CrashReason* r);
-
-void InitGoogleLoggingUtilities(const char* argv0);
-void ShutdownGoogleLoggingUtilities();
+void DumpStackTraceAndExit();
 
 }  // namespace glog_internal_namespace_
 

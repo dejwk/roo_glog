@@ -69,7 +69,7 @@ const struct {
   { SIGTERM, "SIGTERM" },
 };
 
-static bool kFailureSignalHandlerInstalled = false;
+// static bool kFailureSignalHandlerInstalled = false;
 
 // Returns the program counter from signal context, NULL if unknown.
 void* GetPC(void* ucontext_in_void) {

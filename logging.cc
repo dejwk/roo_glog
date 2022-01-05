@@ -1159,8 +1159,16 @@ void LogFileObject::Write(bool force_flush,
 static Mutex fatal_msg_lock;
 static CrashReason crash_reason;
 static bool fatal_msg_exclusive = true;
-static LogMessage::LogMessageData fatal_msg_data_exclusive;
-static LogMessage::LogMessageData fatal_msg_data_shared;
+
+static LogMessage::LogMessageData& fatal_msg_data_exclusive() {
+  static LogMessage::LogMessageData data;
+  return data;
+}
+
+static LogMessage::LogMessageData& fatal_msg_data_shared() {
+  static LogMessage::LogMessageData data;
+  return data;
+}
 
 #ifdef GLOG_THREAD_LOCAL_STORAGE
 // Static thread-local log data space to use, because typically at most one
@@ -1244,10 +1252,10 @@ void LogMessage::Init(const char* file,
     MutexLock l(&fatal_msg_lock);
     if (fatal_msg_exclusive) {
       fatal_msg_exclusive = false;
-      data_ = &fatal_msg_data_exclusive;
+      data_ = &fatal_msg_data_exclusive();
       data_->first_fatal_ = true;
     } else {
-      data_ = &fatal_msg_data_shared;
+      data_ = &fatal_msg_data_shared();
       data_->first_fatal_ = false;
     }
   }
@@ -1401,7 +1409,7 @@ void ReprintFatalMessage() {
 
 // L >= log_mutex (callers must hold the log_mutex).
 void LogMessage::SendToLog() EXCLUSIVE_LOCKS_REQUIRED(log_mutex) {
-  static bool already_warned_before_initgoogle = false;
+//   static bool already_warned_before_initgoogle = false;
 
   log_mutex.AssertHeld();
 
@@ -1409,13 +1417,6 @@ void LogMessage::SendToLog() EXCLUSIVE_LOCKS_REQUIRED(log_mutex) {
              data_->message_text_[data_->num_chars_to_log_-1] == '\n', "");
 
   // Messages of a given severity get logged to lower severity logs, too
-
-  if (!already_warned_before_initgoogle && !IsGoogleLoggingInitialized()) {
-    const char w[] = "WARNING: Logging before InitGoogleLogging() is "
-                     "written to STDERR\n";
-    WriteToStderr(w, strlen(w));
-    already_warned_before_initgoogle = true;
-  }
 
   if (true) {
     // log this message to all log files of severity <= severity_
@@ -1479,10 +1480,10 @@ void LogMessage::SendToLog() EXCLUSIVE_LOCKS_REQUIRED(log_mutex) {
 
 void LogMessage::RecordCrashReason(
     glog_internal_namespace_::CrashReason* reason) {
-  reason->filename = fatal_msg_data_exclusive.fullname_;
-  reason->line_number = fatal_msg_data_exclusive.line_;
-  reason->message = fatal_msg_data_exclusive.message_text_ +
-                    fatal_msg_data_exclusive.num_prefix_chars_;
+  reason->filename = fatal_msg_data_exclusive().fullname_;
+  reason->line_number = fatal_msg_data_exclusive().line_;
+  reason->message = fatal_msg_data_exclusive().message_text_ +
+                    fatal_msg_data_exclusive().num_prefix_chars_;
 #ifdef HAVE_STACKTRACE
   // Retrieve the stack trace, omitting the logging frames that got us here.
   reason->depth = GetStackTrace(reason->stack, ARRAYSIZE(reason->stack), 4);
@@ -1500,23 +1501,23 @@ void LogMessage::RecordCrashReason(
 #if defined(OS_WINDOWS)
 __declspec(noreturn)
 #endif
-static void logging_fail() ATTRIBUTE_NORETURN;
+// static void logging_fail() ATTRIBUTE_NORETURN;
 
-static void logging_fail() {
-  abort();
-}
+// static void logging_fail() {
+//   abort();
+// }
 
 typedef void (*logging_fail_func_t)() ATTRIBUTE_NORETURN;
 
-GOOGLE_GLOG_DLL_DECL
-logging_fail_func_t g_logging_fail_func = &logging_fail;
+// GOOGLE_GLOG_DLL_DECL
+// logging_fail_func_t g_logging_fail_func = &logging_fail;
 
-void InstallFailureFunction(void (*fail_func)()) {
-  g_logging_fail_func = (logging_fail_func_t)fail_func;
+logging_fail_func_t g_logging_fail_func() {
+  return &DumpStackTraceAndExit;
 }
 
 void LogMessage::Fail() {
-  g_logging_fail_func();
+  g_logging_fail_func()();
 }
 
 // L >= log_mutex (callers must hold the log_mutex).
@@ -2148,17 +2149,6 @@ void MakeCheckOpValueString(std::ostream* os, const unsigned char& v) {
   } else {
     (*os) << "unsigned char value " << (unsigned short)v;
   }
-}
-
-void InitGoogleLogging(const char* argv0) {
-  glog_internal_namespace_::InitGoogleLoggingUtilities(argv0);
-}
-
-void ShutdownGoogleLogging() {
-  glog_internal_namespace_::ShutdownGoogleLoggingUtilities();
-  LogDestination::DeleteLogDestinations();
-  delete logging_directories_list;
-  logging_directories_list = NULL;
 }
 
 _END_GOOGLE_NAMESPACE_

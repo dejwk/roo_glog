@@ -58,8 +58,7 @@ using std::string;
 
 _START_GOOGLE_NAMESPACE_
 
-static const char* g_program_invocation_short_name = NULL;
-static pthread_t g_main_thread_id;
+//static pthread_t g_main_thread_id;
 
 _END_GOOGLE_NAMESPACE_
 
@@ -137,27 +136,6 @@ static void DumpStackTrace(int skip_count, DebugWriter *writerfn, void *arg) {
   }
 }
 
-static void DumpStackTraceAndExit() {
-  DumpStackTrace(1, DebugWriteToStderr, NULL);
-
-  // TOOD(hamaji): Use signal instead of sigaction?
-  if (IsFailureSignalHandlerInstalled()) {
-    // Set the default signal handler for SIGABRT, to avoid invoking our
-    // own signal handler installed by InstallFailureSignalHandler().
-#ifdef HAVE_SIGACTION
-    struct sigaction sig_action;
-    memset(&sig_action, 0, sizeof(sig_action));
-    sigemptyset(&sig_action.sa_mask);
-    sig_action.sa_handler = SIG_DFL;
-    sigaction(SIGABRT, &sig_action, NULL);
-#elif defined(OS_WINDOWS)
-    signal(SIGABRT, SIG_DFL);
-#endif  // HAVE_SIGACTION
-  }
-
-  abort();
-}
-
 _END_GOOGLE_NAMESPACE_
 
 #endif  // HAVE_STACKTRACE
@@ -166,28 +144,17 @@ _START_GOOGLE_NAMESPACE_
 
 namespace glog_internal_namespace_ {
 
+#ifndef ROO_GLOG_PROGRAM_NAME
+#define ROO_GLOG_PROGRAM_NAME "microcontroller"
+#endif
+
 const char* ProgramInvocationShortName() {
-  if (g_program_invocation_short_name != NULL) {
-    return g_program_invocation_short_name;
-  } else {
-    // TODO(hamaji): Use /proc/self/cmdline and so?
-    return "UNKNOWN";
-  }
+  return ROO_GLOG_PROGRAM_NAME;
 }
 
-bool IsGoogleLoggingInitialized() {
-  return g_program_invocation_short_name != NULL;
-}
-
-bool is_default_thread() {
-  if (g_program_invocation_short_name == NULL) {
-    // InitGoogleLogging() not yet called, so unlikely to be in a different
-    // thread
-    return true;
-  } else {
-    return pthread_equal(pthread_self(), g_main_thread_id);
-  }
-}
+// bool is_default_thread() {
+//   return pthread_equal(pthread_self(), g_main_thread_id);
+// }
 
 #ifdef OS_WINDOWS
 struct timeval {
@@ -305,28 +272,26 @@ void SetCrashReason(const CrashReason* r) {
                             r);
 }
 
-void InitGoogleLoggingUtilities(const char* argv0) {
-  CHECK(!IsGoogleLoggingInitialized())
-      << "You called InitGoogleLogging() twice!";
-  const char* slash = strrchr(argv0, '/');
-#ifdef OS_WINDOWS
-  if (!slash)  slash = strrchr(argv0, '\\');
-#endif
-  g_program_invocation_short_name = slash ? slash + 1 : argv0;
-  g_main_thread_id = pthread_self();
-
+void DumpStackTraceAndExit() {
 #ifdef HAVE_STACKTRACE
-  InstallFailureFunction(&DumpStackTraceAndExit);
+  DumpStackTrace(1, DebugWriteToStderr, NULL);
 #endif
-}
+  // TOOD(hamaji): Use signal instead of sigaction?
+  if (IsFailureSignalHandlerInstalled()) {
+    // Set the default signal handler for SIGABRT, to avoid invoking our
+    // own signal handler installed by InstallFailureSignalHandler().
+#ifdef HAVE_SIGACTION
+    struct sigaction sig_action;
+    memset(&sig_action, 0, sizeof(sig_action));
+    sigemptyset(&sig_action.sa_mask);
+    sig_action.sa_handler = SIG_DFL;
+    sigaction(SIGABRT, &sig_action, NULL);
+#elif defined(OS_WINDOWS)
+    signal(SIGABRT, SIG_DFL);
+#endif  // HAVE_SIGACTION
+  }
 
-void ShutdownGoogleLoggingUtilities() {
-  CHECK(IsGoogleLoggingInitialized())
-      << "You called ShutdownGoogleLogging() without calling InitGoogleLogging() first!";
-  g_program_invocation_short_name = NULL;
-#ifdef HAVE_SYSLOG_H
-  closelog();
-#endif
+  abort();
 }
 
 }  // namespace glog_internal_namespace_
