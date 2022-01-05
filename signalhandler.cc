@@ -107,7 +107,7 @@ class MinimalFormatter {
 
   // Formats "number" in "radix" and updates the internal cursor.
   // Lowercase letters are used for 'a' - 'z'.
-  void AppendUint64(uint64 number, int radix) {
+  void AppendUint64(uint64_t number, int radix) {
     int i = 0;
     while (cursor_ + i < end_) {
       const int tmp = number % radix;
@@ -125,13 +125,13 @@ class MinimalFormatter {
 
   // Formats "number" as hexadecimal number, and updates the internal
   // cursor.  Padding will be added in front if needed.
-  void AppendHexWithPadding(uint64 number, int width) {
+  void AppendHexWithPadding(uint64_t number, int width) {
     char* start = cursor_;
     AppendString("0x");
     AppendUint64(number, 16);
     // Move to right and add padding in front if needed.
     if (cursor_ < start + width) {
-      const int64 delta = start + width - cursor_;
+      const int64_t delta = start + width - cursor_;
       std::copy(start, cursor_, start + delta);
       std::fill(start, start + delta, ' ');
       cursor_ = start + width;

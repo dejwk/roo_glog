@@ -81,8 +81,8 @@
 // parsing of --vmodule flag and/or SetVLOGLevel calls.
 #define VLOG_IS_ON(verboselevel)                                \
   __extension__  \
-  ({ static GOOGLE_NAMESPACE::int32* vlocal__ = &GOOGLE_NAMESPACE::kLogSiteUninitialized;           \
-     GOOGLE_NAMESPACE::int32 verbose_level__ = (verboselevel);                    \
+  ({ static int32_t* vlocal__ = &GOOGLE_NAMESPACE::kLogSiteUninitialized;           \
+     int32_t verbose_level__ = (verboselevel);                    \
      (*vlocal__ >= verbose_level__) &&                          \
      ((vlocal__ != &GOOGLE_NAMESPACE::kLogSiteUninitialized) ||                   \
       (GOOGLE_NAMESPACE::InitVLOG3__(&vlocal__, &FLAGS_v,                         \

@@ -335,7 +335,7 @@ static const char* GetAnsiColorCode(GLogColor color) {
 #endif  // OS_WINDOWS
 
 // Safely get max_log_size, overriding to 1 if it somehow gets defined as 0
-static int32 MaxLogSize() {
+static int32_t MaxLogSize() {
   return (FLAGS_max_log_size > 0 ? FLAGS_max_log_size : 1);
 }
 
@@ -389,7 +389,7 @@ struct LogMessage::LogMessageData  {
 static Mutex log_mutex;
 
 // Number of messages sent at each severity.  Under log_mutex.
-int64 LogMessage::num_messages_[NUM_SEVERITIES] = {0, 0, 0, 0};
+int64_t LogMessage::num_messages_[NUM_SEVERITIES] = {0, 0, 0, 0};
 
 // Globally disable log writing (if disk is full)
 static bool stop_writing = false;
@@ -434,7 +434,7 @@ class LogFileObject : public base::Logger {
 
   // It is the actual file length for the system loggers,
   // i.e., INFO, ERROR, etc.
-  virtual uint32 LogSize() {
+  virtual uint32_t LogSize() {
     MutexLock l(&lock_);
     return file_length_;
   }
@@ -445,7 +445,7 @@ class LogFileObject : public base::Logger {
   void FlushUnlocked();
 
  private:
-  static const uint32 kRolloverAttemptFrequency = 0x20;
+  static const uint32_t kRolloverAttemptFrequency = 0x20;
 
   Mutex lock_;
   bool base_filename_selected_;
@@ -454,11 +454,11 @@ class LogFileObject : public base::Logger {
   string filename_extension_;     // option users can specify (eg to add port#)
   FILE* file_;
   LogSeverity severity_;
-  uint32 bytes_since_flush_;
-  uint32 dropped_mem_length_;
-  uint32 file_length_;
+  uint32_t bytes_since_flush_;
+  uint32_t dropped_mem_length_;
+  uint32_t file_length_;
   unsigned int rollover_attempt_;
-  int64 next_flush_time_;         // cycle count at which to flush log
+  int64_t next_flush_time_;         // cycle count at which to flush log
 
   // Actually create a logfile using the value of base_filename_ and the
   // supplied argument time_pid_string
@@ -916,8 +916,8 @@ void LogFileObject::FlushUnlocked(){
     bytes_since_flush_ = 0;
   }
   // Figure out when we are due for another flush.
-  const int64 next = (FLAGS_logbufsecs
-                      * static_cast<int64>(1000000));  // in usec
+  const int64_t next = (FLAGS_logbufsecs
+                      * static_cast<int64_t>(1000000));  // in usec
   next_flush_time_ = CycleClock_Now() + UsecToCycles(next);
 }
 
@@ -1143,8 +1143,8 @@ void LogFileObject::Write(bool force_flush,
     if (FLAGS_drop_log_memory && file_length_ >= (3 << 20)) {
       // Don't evict the most recent 1-2MiB so as not to impact a tailer
       // of the log file and to avoid page rounding issue on linux < 4.7
-      uint32 total_drop_length = (file_length_ & ~((1 << 20) - 1)) - (1 << 20);
-      uint32 this_drop_length = total_drop_length - dropped_mem_length_;
+      uint32_t total_drop_length = (file_length_ & ~((1 << 20) - 1)) - (1 << 20);
+      uint32_t this_drop_length = total_drop_length - dropped_mem_length_;
       if (this_drop_length >= (2 << 20)) {
         // Only advise when >= 2MiB to drop
         posix_fadvise(fileno(file_), dropped_mem_length_, this_drop_length,
@@ -1622,7 +1622,7 @@ void base::SetLogger(LogSeverity severity, base::Logger* logger) {
 }
 
 // L < log_mutex.  Acquires and releases mutex_.
-int64 LogMessage::num_messages(int severity) {
+int64_t LogMessage::num_messages(int severity) {
   MutexLock l(&log_mutex);
   return num_messages_[severity];
 }
@@ -1943,7 +1943,7 @@ void GetExistingTempDirectories(vector<string>* list) {
   }
 }
 
-void TruncateLogFile(const char *path, int64 limit, int64 keep) {
+void TruncateLogFile(const char *path, int64_t limit, int64_t keep) {
 #ifdef HAVE_UNISTD_H
   struct stat statbuf;
   const int kCopyBlockSize = 8 << 10;

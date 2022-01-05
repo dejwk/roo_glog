@@ -213,14 +213,14 @@ static int gettimeofday(struct timeval *tv, void* tz) {
 }
 #endif
 
-int64 CycleClock_Now() {
+int64_t CycleClock_Now() {
   // TODO(hamaji): temporary impementation - it might be too slow.
   struct timeval tv;
   gettimeofday(&tv, NULL);
-  return static_cast<int64>(tv.tv_sec) * 1000000 + tv.tv_usec;
+  return static_cast<int64_t>(tv.tv_sec) * 1000000 + tv.tv_usec;
 }
 
-int64 UsecToCycles(int64 usec) {
+int64_t UsecToCycles(int64_t usec) {
   return usec;
 }
 
@@ -229,13 +229,13 @@ WallTime WallTime_Now() {
   return CycleClock_Now() * 0.000001;
 }
 
-static int32 g_main_thread_pid = getpid();
-int32 GetMainThreadPid() {
+static int32_t g_main_thread_pid = getpid();
+int32_t GetMainThreadPid() {
   return g_main_thread_pid > 0 ? g_main_thread_pid : 0;
 }
 
 bool PidHasChanged() {
-  int32 pid = getpid();
+  int32_t pid = getpid();
   if (g_main_thread_pid == pid) {
     return false;
   }
@@ -313,7 +313,7 @@ void InitGoogleLoggingUtilities(const char* argv0) {
   if (!slash)  slash = strrchr(argv0, '\\');
 #endif
   g_program_invocation_short_name = slash ? slash + 1 : argv0;
-  g_main_thread_id = 1;//pthread_self();
+  g_main_thread_id = pthread_self();
 
 #ifdef HAVE_STACKTRACE
   InstallFailureFunction(&DumpStackTraceAndExit);

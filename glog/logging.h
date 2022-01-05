@@ -48,6 +48,8 @@
 #endif
 #include <vector>
 
+#include "config.h"
+
 #if defined(_MSC_VER)
 #define GLOG_MSVC_PUSH_DISABLE_WARNING(n) __pragma(warning(push)) \
                                      __pragma(warning(disable:n))
@@ -65,49 +67,6 @@
 #   define GOOGLE_GLOG_DLL_DECL
 # endif
 #endif
-
-// We care a lot about number of bits things take up.  Unfortunately,
-// systems define their bit-specific ints in a lot of different ways.
-// We use our own way, and have a typedef to get there.
-// Note: these commands below may look like "#if 1" or "#if 0", but
-// that's because they were constructed that way at ./configure time.
-// Look at logging.h.in to see how they're calculated (based on your config).
-#if 1
-#include <stdint.h>             // the normal place uint16_t is defined
-#endif
-#if 1
-#include <sys/types.h>          // the normal place u_int16_t is defined
-#endif
-#if 1
-#include <inttypes.h>           // a third place for uint16_t or u_int16_t
-#endif
-
-#if 0
-#include <gflags/gflags.h>
-#endif
-
-_START_GOOGLE_NAMESPACE_
-
-#if 1      // the C99 format
-typedef int32_t int32;
-typedef uint32_t uint32;
-typedef int64_t int64;
-typedef uint64_t uint64;
-#elif 1   // the BSD format
-typedef int32_t int32;
-typedef u_int32_t uint32;
-typedef int64_t int64;
-typedef u_int64_t uint64;
-#elif 0    // the windows (vc7) format
-typedef __int32 int32;
-typedef unsigned __int32 uint32;
-typedef __int64 int64;
-typedef unsigned __int64 uint64;
-#else
-#error Do not know how to define a 32-bit integer quantity on your system
-#endif
-
-}
 
 // The global value of GOOGLE_STRIP_LOG. All the messages logged to
 // LOG(XXX) with severity less than GOOGLE_STRIP_LOG will not be displayed.
