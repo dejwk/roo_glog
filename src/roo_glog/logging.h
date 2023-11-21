@@ -43,6 +43,7 @@
 #include <ostream>
 #include <sstream>
 #include <string>
+#include <inttypes.h>
 #if 1
 # include <unistd.h>
 #endif
