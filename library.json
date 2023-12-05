@@ -1,0 +1,31 @@
+{
+    "name": "roo_glog",
+    "description": "Arduino-compliant ligtweight loggin library, targeted at ESP32 and related boards. Port of Google's logging library. Supports writing logs to Serial, but also, to SD and other sinks.",
+    "keywords": [
+        "logging",
+        "Google"
+    ],
+    "authors": [
+        {
+            "name": "Dawid Kurzyniec",
+            "email": "dawid.kurzyniec@gmail.com",
+            "maintainer": true
+        }
+    ],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/dejwk/roo_glog"
+    },
+    "version": "1.0.0",
+    "homepage": "https://github.com/dejwk/roo_glog",
+    "frameworks": [
+        "Arduino"
+    ],
+    "build": {
+        "srcDir": "src",
+        "srcFilter": "+<*> -<examples> -<benchmarks> -<doc> -<test>"
+    },
+    "examples": [
+        "examples/**/*.ino"
+    ]
+}
